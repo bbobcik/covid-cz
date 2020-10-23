@@ -132,7 +132,7 @@ png(paste0('covid_forecast_eval_', fcast_eval_date, '.png'), width=2400L, height
 (g13/g11) | (g14/g12)
 dev.off()
 png('outputs/covid_forecast_eval_latest.png', width=1500L, height=800L, type='cairo', res=90)
-(g13/g11) | (g14/g12)
+((g13/g11) | (g14/g12)) + plot_annotation(caption='Autor: Boleslav Bobčík, https://github.com/bbobcik/covid-cz\nZdroj dat: MZČR, https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19')
 dev.off()
 
 

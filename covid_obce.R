@@ -1,6 +1,6 @@
 
 place_cases <- read_delim(
-    file='obec_20201022.csv',
+    file='obec_20201023.csv',
     delim=';',
     col_types=cols_only(
         date = col_date('%Y-%m-%d'),
@@ -62,17 +62,19 @@ interesting_places <- place_cases %>%
     geom_dl(aes(label=place_name), method=list(cex=0.8, dl.trans(x=x+0.25), 'maxvar.qp')) +
     scale_x_date(name=NULL, date_breaks='1 week', date_minor_breaks='1 day', date_labels='%e.%b.', expand=expansion(0, c(2,10))) +
     scale_y_continuous(name=NULL, breaks=extended_breaks(Q=c(2,5,1,3,4), w=c(0.2, 0.4, 0.15, 0.25)), minor_breaks=NULL, labels=number_format(accuracy=1)) +
-    labs(title='Počet aktivních případů Covid-19', caption='Zdroj dat: https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19') +
-    theme_bw() +
+    standard_label('Počet aktivních případů Covid-19 ve vybraných obcích') +
+    custom_theme +        
     theme(
         panel.grid.major.x=element_line(color='#B0B0B0'),
         plot.title=element_text(size=12),
-        plot.caption=element_text(size=8, colour='#404040')
     ) +
     NULL)
 
 interest_plot_date = interesting_places %>% pull(date) %>% max() %>% strftime('%Y-%m-%d')
-png(paste0('covid_focus_', interest_plot_date, '.png'), width=2000, height=1200, res=120, type='cairo')
+png(paste0('outputs/', interest_plot_date, '/covid_focus_', interest_plot_date, '.png'), width=2000, height=1200, res=120, type='cairo')
+g19
+dev.off()
+png('outputs/covid_focus_latest.png', width=1500, height=800, res=90, type='cairo')
 g19
 dev.off()
 
