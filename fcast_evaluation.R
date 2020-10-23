@@ -131,6 +131,10 @@ fcast_eval_date <- strftime(today(), '%Y-%m-%d')
 png(paste0('covid_forecast_eval_', fcast_eval_date, '.png'), width=2400L, height=1200L, type='cairo', res=120)
 (g13/g11) | (g14/g12)
 dev.off()
+png('outputs/covid_forecast_eval_latest.png', width=1500L, height=800L, type='cairo', res=90)
+(g13/g11) | (g14/g12)
+dev.off()
+
 
 
 htmlwidgets::saveWidget(as_widget(ggplotly(g11)), 'region_diag.html')
