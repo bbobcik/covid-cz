@@ -16,6 +16,18 @@ library(patchwork)
 library(slider)
 
 
+standard_label <- function(title) {
+    labs(title=title, caption='Autor: Boleslav Bobčík, https://github.com/bbobcik/covid-cz\nZdroj dat: MZČR, https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19')
+}
+
+
+custom_theme <- theme_bw() +
+    theme(
+        plot.caption=element_text(size=8, colour='darkgray')
+    )
+
+
+
 ################################################################################
 # Pomocne funkce
 
@@ -111,21 +123,24 @@ covid_full_info <- covid_orp %>%
     select(region_abbr, name, date, pop, avg_age, inc_week, prev, hospit, tests,
            inc_week_65, inc_week_75, prev_65, prev_75, hospit_delta,
            pop_young, pop_old, q_young, q_old,
-           region, region_code, full_name, orp_code) %>% 
+           region, region_code, full_name, orp_code, ruian_orp_id) %>% 
     group_by(region_code, orp_code) %>% 
     arrange(.by_group=T, date) %>% 
     mutate(day_idx = row_number()) %>% 
     ungroup()
 
-covid_week <- covid_full_info %>% 
-    group_by(region_abbr, region, region_code, name, full_name, orp_code, pop, avg_age, pop_young, pop_old, q_young, q_old) %>% 
+
+covid_dow <- covid_full_info %>% 
+    group_by(region_abbr, name, orp_code, ruian_orp_id, pop) %>% 
     arrange(.by_group=T, date) %>% 
     mutate(
         week = floor_date(date, unit="week", week_start=1L),
-        new_cases = prev - lag(prev, default=0L),
-        new_hospit = hospit - lag(hospit, default=0L),
+        dow = factor(wday(date, label=T, abbr=F, locale='Czech'), ordered=T, levels=c('pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota', 'neděle')),
+        new_cases = pmax(prev - lag(prev, default=0L), 0),
+        new_hospit = pmax(hospit - lag(hospit, default=0L), 0),
     ) %>%
-    group_by(.add=T, week) %>% 
+    group_by(.add=T, dow) %>% 
+    arrange(.by_group=T) %>% 
     summarise(
         new_cases = sum(new_cases),
         new_hospit = sum(new_hospit),
@@ -134,9 +149,99 @@ covid_week <- covid_full_info %>%
         .groups = 'drop_last'
     ) %>%
     mutate(
-        week_num = 1L - row_number(desc(week)),
+        q_new = new_cases / pmax(sum(new_cases), 1),
+        c_new = cumsum(q_new),
     ) %>% 
     ungroup()
+
+
+covid_dow_total <- covid_dow %>% 
+    group_by(dow) %>% 
+    summarise(
+        new_cases = sum(new_cases),
+        .groups = 'drop'
+    ) %>% 
+    arrange(dow) %>% 
+    transmute(
+        dow_idx = as.integer(dow),
+        dow,
+        new_cases,
+        q_new = new_cases / sum(new_cases),
+        c_new = cumsum(q_new),
+        predict_factor = 1 / c_new,
+    )
+
+covid_dow %>%
+    group_by(region_abbr, dow) %>% 
+    arrange(.by_group=T) %>% 
+    summarise(
+        q_new_25 = quantile(q_new, 0.25),
+        q_new_50 = quantile(q_new, 0.50),
+        q_new_75 = quantile(q_new, 0.75),
+        q_new_avg = mean(q_new),
+        .groups='drop'
+    ) %>%
+    inner_join(covid_dow_total, by='dow') %>% 
+    ggplot(aes(x=dow_idx)) +
+    geom_ribbon(aes(ymin=q_new_25, ymax=q_new_75), fill='skyblue', alpha=0.5) +
+    geom_line(aes(y=q_new_50), colour='black', size=1.5, alpha=0.5) +
+    geom_point(aes(y=q_new_avg), colour='red', size=1.5) +
+    geom_line(aes(y=q_new_avg), colour='red', size=0.5) +
+    geom_line(aes(y=q_new), colour='black', size=0.3, linetype=2) +
+    facet_wrap(vars(region_abbr), ncol=5L) +
+    scale_x_continuous(name=NULL, breaks=1:7, labels=levels(covid_dow$dow), minor_breaks=NULL) +
+    scale_y_continuous(name=NULL, labels=percent_format(), minor_breaks=NULL) +
+    standard_label('Podíl detekovaných nákaz podle dnů v týdnu') +
+    custom_theme +
+    NULL
+
+covid_dow_total %>% 
+    ggplot(aes(x=dow, y=q_new)) +
+    geom_col(fill='darkblue', alpha=0.6) +
+    scale_x_discrete(name=NULL) +
+    scale_y_continuous(name=NULL, labels=percent_format(), minor_breaks=NULL) +
+    standard_label('Podíl detekovaných nákaz podle dnů v týdnu') +
+    custom_theme +
+    NULL
+
+
+
+covid_week_scaling_factor <- function(dates) {
+    max_date = max(dates)
+    max_dow = wday(max_date, week_start=1L)
+    week_factor = covid_dow_total$predict_factor[max_dow]
+    return (week_factor)
+}
+
+
+
+covid_week <- covid_full_info %>% 
+    group_by(region_abbr, region, region_code, name, full_name, orp_code, ruian_orp_id, pop, avg_age, pop_young, pop_old, q_young, q_old) %>% 
+    arrange(.by_group=T, date) %>% 
+    mutate(
+        week = floor_date(date, unit="week", week_start=1L),
+        new_cases = pmax(prev - lag(prev, default=0L), 0L),
+        new_hospit = pmax(hospit - lag(hospit, default=0L), 0L),
+    ) %>%
+    group_by(.add=T, week) %>% 
+    summarise(
+        week_factor = covid_week_scaling_factor(date),
+        new_cases = sum(new_cases),
+        new_hospit = sum(new_hospit),
+        prevalence = last(prev),
+        hospitalised = last(hospit),
+        .groups = 'drop_last'
+    ) %>%
+    mutate(
+        new_cases_actual = new_cases,
+        new_cases = as.integer(round(week_factor * new_cases)),
+        week_num = 1L - row_number(desc(week)),
+    ) %>% 
+    ungroup() %>% 
+    arrange(week, region_code, orp_code) %>% 
+    mutate(
+        week_disc = fct_inorder(strftime(week, '%e.%b.')),
+    )
 
 covid_region <- covid_week %>% 
     group_by(region_abbr, region, region_code, week, week_num) %>% 
@@ -205,14 +310,45 @@ gov_interventions_timeline <- tibble(
 
 
 covid_week %>% 
-    filter(week_num > -20L) %>% 
-    ggplot(aes(x=prevalence/pop, y=new_cases/pop, colour=week)) +
-    geom_jitter(alpha=0.3) +
-    geom_smooth(method='lm', formula=y~x, se=F, na.rm=T, colour="darkblue") +
-    scale_x_continuous(name="Prevalence", labels=percent_format()) +
-    scale_y_continuous(name="Nové případy", labels=percent_format()) +
-    scale_colour_date(name="Týden", date_labels="%d.%m.") +
+    filter(week >= ymd('2020-09-14')) %>% 
+    mutate(
+        rel_prev = prevalence / pop,
+        rel_new = new_cases / (pop - prevalence),
+    ) %>%
+    arrange(week, desc(pop), region_abbr, desc(rel_prev), orp_code) %>% 
+    ggplot(aes(x=rel_prev, y=rel_new, colour=week_disc)) +
+    geom_jitter(aes(size=pop), width=0.0002, height=0.0002) +
+    geom_smooth(method='gam', formula=y~x, se=F, fullrange=T, na.rm=T, colour="darkred", size=0.4, alpha=0.6) +
+    expand_limits(x=c(0,0.03), y=0) +
+    scale_x_continuous(name="Počet aktivních případů v poměru k počtu obyvatel", labels=percent_format()) +
+    scale_y_continuous(name="Počet nových případů v poměru k počtu zdravých obyvatel", labels=percent_format()) +
+    scale_colour_brewer(name="Týden", type="qual", palette="PuBu") +
+    scale_size_continuous(name="Počet obyvatel", breaks=c(0,1000,10000,50000,100000,200000,500000,10000000,Inf), labels=number_format(), range=c(0.4, 6)) +
+    standard_label("Dynamika nakažlivosti COVID-19 na úrovni ORP") +
+    custom_theme +
+    theme(
+        axis.title.x.bottom=element_text(hjust=0.97, margin=margin(-30,0,20,0, unit='pt')),
+        axis.title.y.left=element_text(hjust=0.95, margin=margin(0,-50,0,40, unit='pt')),
+    ) +
     NULL
+
+
+covid_week %>% 
+    filter(week_num > -8L) %>% 
+    left_join(master_orp, by=c('ruian_orp_id'='orp_id')) %>% 
+    mutate(
+        rel_prev = prevalence / pop,
+        rel_new = new_cases / (pop - prevalence),
+    ) %>%
+    #filter(rel_prev >= quantile(rel_prev, 0.75)) %>% 
+    ggplot(aes(x=pop/places, rel_new, colour=week_disc)) +
+    geom_point() +
+    expand_limits(y=0) +
+    scale_x_continuous(trans=pseudo_log_trans(1,10), breaks=log_breaks(n=8), labels=number_format(big.mark='\'')) +
+    scale_colour_brewer(name="Týden", type="qual", palette="PuBu") +
+    NULL
+    
+
 
 
 covid_week %>% 
@@ -220,32 +356,44 @@ covid_week %>%
     group_by(orp_code) %>% 
     arrange(.by_group=T, week) %>% 
     mutate(
-        q1 = new_cases / lag(prevalence, n=1L),
+        q2 = new_cases / lag(prevalence, n=2L),
     ) %>% 
     group_by(week, week_num) %>% 
     summarise(
-        q_25 = quantile(q1, 0.25, na.rm=T),
-        q_50 = quantile(q1, 0.50, na.rm=T),
-        q_75 = quantile(q1, 0.75, na.rm=T),
+        q_25 = quantile(q2, 0.25, na.rm=T),
+        q_50 = quantile(q2, 0.50, na.rm=T),
+        q_75 = quantile(q2, 0.75, na.rm=T),
         .groups = 'drop'
     ) %>% 
     filter(week_num > -12L) %>% 
     ggplot(aes(x=week)) +
     geom_ribbon(aes(ymin=q_25, ymax=q_75), fill='skyblue', alpha=0.25) +
-    geom_line(aes(y=q_50), colour="blue")
+    geom_line(aes(y=q_50), colour="blue", size=0.5) +
+    geom_point(aes(y=q_50), colour="blue", size=1.5) +
+    expand_limits(y=0) +
+    scale_x_date(name=NULL, date_breaks='2 weeks', date_minor_breaks='1 week', date_labels='%e.%b.') +
+    scale_y_continuous(name=NULL, labels=percent_format()) +
+    standard_label('Poměr nových případů oproti celkovému počtu nakažených před 2 týdny') +
+    custom_theme + 
+    NULL
     
 
-
 covid_region_day <- covid_full_info %>% 
+    left_join(master_orp, by=c('ruian_orp_id'='orp_id'), suffix=c('', '_orp')) %>% 
     group_by(region_abbr, date) %>% 
     arrange(.by_group=T) %>% 
     summarise(
+        q_active_orp = mean(prev > 0L),
+        population = sum(pop),
         prevalence = sum(prev),
+        wavg_prev = sum(as.numeric(prev) * places) / sum(places),
         hospitalised = sum(hospit),
         .groups = 'drop_last'
     ) %>% 
     mutate(
         day = row_number(date),
+        healthy = population - prevalence,
+        q_healthy = healthy / population,
     ) %>% 
     ungroup()
 
