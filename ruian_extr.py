@@ -72,8 +72,8 @@ for _, element in etree.iterparse('20200930_ST_UZSZ.xml', huge_tree=True, remove
 		process_pou(element)
 	elif element.tag == '{urn:cz:isvs:ruian:schemas:VymennyFormatTypy:v1}Obec':
 		process_obec(element)
-		dump_element(element)
-		break
+#		dump_element(element)
+#		break
 	else:
 		processed = False
 	if processed:

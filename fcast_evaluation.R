@@ -63,7 +63,7 @@ forecast_validation_total <- forecast_validation_region %>%
         .groups = 'drop'
     )
 
-region_forecast_2 <- readRDS('region_forecast_20201021.rds')
+region_forecast_2 <- readRDS('models/region_forecast_20201021.rds')
 
 
 (g11 <- region_forecast_2 %>% 
@@ -128,7 +128,7 @@ region_forecast_2 <- readRDS('region_forecast_20201021.rds')
 
 
 fcast_eval_date <- strftime(today(), '%Y-%m-%d')
-png(paste0('covid_forecast_eval_', fcast_eval_date, '.png'), width=2400L, height=1200L, type='cairo', res=120)
+png(paste0('outputs/', fcast_eval_date, '/covid_forecast_eval_', fcast_eval_date, '.png'), width=2400L, height=1200L, type='cairo', res=120)
 (g13/g11) | (g14/g12)
 dev.off()
 png('outputs/covid_forecast_eval_latest.png', width=1500L, height=800L, type='cairo', res=90)
