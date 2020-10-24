@@ -135,7 +135,7 @@ covid_dow <- covid_full_info %>%
     arrange(.by_group=T, date) %>% 
     mutate(
         week = floor_date(date, unit="week", week_start=1L),
-        dow = factor(wday(date, label=T, abbr=F, locale='Czech'), ordered=T, levels=c('pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota', 'neděle')),
+        dow = factor(wday(date, label=T, abbr=F, locale='cs_CZ.UTF8'), ordered=T, levels=c('Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle')),
         new_cases = pmax(prev - lag(prev, default=0L), 0),
         new_hospit = pmax(hospit - lag(hospit, default=0L), 0),
     ) %>%
@@ -153,7 +153,6 @@ covid_dow <- covid_full_info %>%
         c_new = cumsum(q_new),
     ) %>% 
     ungroup()
-
 
 covid_dow_total <- covid_dow %>% 
     group_by(dow) %>% 
@@ -886,58 +885,8 @@ region_forecast %>%
     arrange(date, region_abbr) %>% 
     format_csv() %>% 
     clipr::write_clip()
+
+
     
 
 
-
-dev.new()
-set.seed(991177335L)
-ggplot(mtcars, aes(x=cyl, y=gear, colour=hp, size=mpg, fill=hp)) +
-    geom_jitter(width=0.5, height=0.25) +
-    scale_colour_fermenter(name='Příliš žluťoučký kůň', palette='Spectral', guide=guide_colorbar(title.theme=element_text(debug=T))) +
-    scale_fill_fermenter(  name='Prilis zlutoucky kun', palette='Spectral', guide=guide_colorbar(title.theme=element_text(debug=T))) +
-    scale_size(guide=guide_none()) +
-    theme(
-        legend.box.background=element_rect(fill='gray')
-    )
-
-grid::widthDetails(grid::textGrob('Prilis zlutoucky kun'))
-grid::widthDetails(grid::textGrob('Příliš žluťoučký kůň'))
-
-grid::calcStringMetric('Příliš žluťoučký kůň')
-grid::calcStringMetric('Prilis zlutoucky kun')
-
-plot.new()
-graphics::strwidth('Příliš žluťoučký kůň',  units='inches')
-graphics::strwidth('Prilis zlutoucky kun',  units='inches')
-
-par()
-
-
-x2 <- list(xlog = FALSE, ylog = FALSE, adj = 0.5, ann = TRUE, ask = FALSE, 
-     bg = "transparent", bty = "o", cex = 1, cex.axis = 1, cex.lab = 1, 
-     cex.main = 1.2, cex.sub = 1, cin = c(0.15, 0.2), col = "black", 
-     col.axis = "black", col.lab = "black", col.main = "black", 
-     col.sub = "black", cra = c(15.15, 20.2), crt = 0, csi = 0.2, 
-     cxy = c(0.028125, 0.0419409412488465), din = c(7, 6.99009900990099
-     ), err = 0L, family = "", fg = "black", fig = c(0, 1, 0, 1), fin = c(7, 6.99009900990099), font = 1L, font.axis = 1L, 
-     font.lab = 1L, font.main = 2L, font.sub = 1L, lab = c(5L, 5L, 7L), las = 0L, lend = "round", lheight = 1, ljoin = "round", 
-     lmitre = 10, lty = "solid", lwd = 1, mai = c(1.02, 0.82, 0.82, 0.42), mar = c(5.1, 4.1, 4.1, 2.1), mex = 1, mfcol = c(1L, 1L), mfg = c(1L, 1L, 1L, 1L), mfrow = c(1L, 1L), mgp = c(3, 
-                                                                                                                                                                        1, 0), mkh = 0.001, new = FALSE, oma = c(0, 0, 0, 0), omd = c(0, 
-                                                                                                                                                                                                                                      1, 0, 1), omi = c(0, 0, 0, 0), page = TRUE, pch = 1L, pin = c(5.76, 
-                                                                                                                                                                                                                                                                                                    5.15009900990099), plt = c(0.117142857142857, 0.94, 0.145920679886686, 
-                                                                                                                                                                                                                                                                                                                               0.882691218130312), ps = 12L, pty = "m", smo = 1, srt = 0, 
-     tck = NA_real_, tcl = -0.5, usr = c(-0.04, 1.04, -0.04, 1.04
-     ), xaxp = c(0, 1, 5), xaxs = "r", xaxt = "s", xpd = FALSE, 
-     yaxp = c(0, 1, 5), yaxs = "r", yaxt = "s", ylbias = 0.2)
-
-dput(par(), control=c('all'))
-
-grDevices::png(..., res = 96)
-
-dev.new()
-graphics::strwidth('Příliš žluťoučký kůň',  units='inches')
-graphics::strwidth('Prilis zlutoucky kun',  units='inches')
-dev.off()
-
-dev.cur()

@@ -1,6 +1,8 @@
+library(slider)
+
 
 place_cases <- read_delim(
-    file='obec_20201023.csv',
+    file='obec_20201024.csv',
     delim=';',
     col_types=cols_only(
         date = col_date('%Y-%m-%d'),
@@ -458,3 +460,89 @@ g2x_aligned[[2]]
 dev.off()
 
     
+
+place_cases %>% 
+    filter(date >= '2020-08-03') %>% 
+    group_by(date) %>%
+    arrange(.by_group=T) %>% 
+    summarise(
+        new_cases = sum(new_cases),
+    ) %>% 
+    ungroup() %>% 
+    mutate(
+        prev_new = lag(new_cases, n=7L, default=0L),
+        q_new = if_else(prev_new == 0L, 0, as.numeric(new_cases) / prev_new),
+    ) %>%
+    ggplot(aes(x=date, y=q_new)) +
+    geom_point() +
+    coord_cartesian(ylim=c(0,5))
+
+
+
+weighted_sum <- function(x, weights=c(1,2,5,8,10), normalize=TRUE) {
+    lx <- length(x)
+    if (lx <= 1L) {
+        return (coalesce(x, 0))
+    } else if (length(weights) <= 0L || near(sum(weights), 0)) {
+        return (x)
+    } else if (length(weights) != length(x)) {
+        weights <- approx(weights, n=length(x), na.rm=TRUE)$y
+    }
+    if (any(is.na(x))) {
+        sub_x <- x[1:(lx-1)]
+        mod_weights <- weights[1:(lx-1)]
+        mod_weights[is.na(sub_x)] <- 0
+        weights[1:(lx-1)] <- mod_weights
+    }
+    wsum <- sum(x * weights, na.rm=T)
+    if (normalize==TRUE) {
+        wsum <- wsum / sum(weights)
+    }
+    return (c(wsum))
+}
+
+spread_by_region <- place_cases %>% 
+    filter(
+        date >= '2020-08-03',
+        place_code != 999999L,
+    ) %>% 
+    group_by(place_code) %>% 
+    arrange(.by_group=T, date) %>%
+    mutate(
+        weighted_new_cases = slide_dbl(new_cases, .f=weighted_sum, .before=3L, .after=3L, weights=c(0.1, 0.25, 0.8, 1, 0.8, 0.25, 0.1), normalize=F),
+        spread_factor = lead(weighted_new_cases, n=7L) / na_if(weighted_new_cases, 0L),
+    ) %>%
+    ungroup() %>% 
+    filter(!is.na(spread_factor)) %>% 
+    group_by(region_id, date) %>% 
+    arrange(.by_group=T) %>% 
+    summarise(
+        spread_25 = quantile(spread_factor, 0.25, na.rm=T),
+        spread_50 = quantile(spread_factor, 0.50, na.rm=T),
+        spread_75 = quantile(spread_factor, 0.75, na.rm=T),
+        .groups = 'drop'
+    ) %>%
+    mutate(week = floor_date(date, unit='week', week_start=1L)) %>% 
+    group_by(week) %>% 
+    mutate(
+        week_spread_50 = median(spread_50, na.rm=T),
+    ) %>% 
+    ungroup() %>% 
+    filter(date < today() - weeks(1)) %>%
+    inner_join(region_abbr_enum, by=c('region_id'='nuts'))
+
+
+spread_by_region %>% 
+    ggplot(aes(x=date)) +
+    geom_ribbon(aes(ymin=spread_25, ymax=spread_75), fill='skyblue', alpha=0.5) +
+    geom_line(aes(y=spread_50), colour='darkblue', size=0.25) +
+    geom_point(aes(y=spread_50), colour='darkblue', size=0.5) +
+    geom_line(aes(y=week_spread_50), colour='black', size=0.5, linetype=2L, alpha=0.5) +
+    coord_cartesian(ylim=c(0,3)) +
+    facet_wrap(vars(region_abbr), ncol=5L) +
+    scale_x_date(name=NULL) +
+    scale_y_continuous(name=NULL, minor_breaks=NULL, labels=percent_format()) +
+    standard_label('Faktor šíření nových případů (N=7 dnů)') +
+    custom_theme
+    
+        
