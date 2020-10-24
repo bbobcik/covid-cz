@@ -183,14 +183,14 @@ covid_dow %>%
     inner_join(covid_dow_total, by='dow') %>% 
     ggplot(aes(x=dow_idx)) +
     geom_ribbon(aes(ymin=q_new_25, ymax=q_new_75), fill='skyblue', alpha=0.5) +
-    geom_line(aes(y=q_new_50), colour='black', size=1.5, alpha=0.5) +
+    geom_line(aes(y=q_new_50), colour='black', size=0.5, alpha=0.5) +
     geom_point(aes(y=q_new_avg), colour='red', size=1.5) +
     geom_line(aes(y=q_new_avg), colour='red', size=0.5) +
     geom_line(aes(y=q_new), colour='black', size=0.3, linetype=2) +
     facet_wrap(vars(region_abbr), ncol=5L) +
     scale_x_continuous(name=NULL, breaks=1:7, labels=levels(covid_dow$dow), minor_breaks=NULL) +
     scale_y_continuous(name=NULL, labels=percent_format(), minor_breaks=NULL) +
-    standard_label('Podíl detekovaných nákaz podle dnů v týdnu') +
+    standard_label('Podíl nových případů podle dnů v týdnu') +
     custom_theme +
     NULL
 

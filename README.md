@@ -23,6 +23,15 @@ dnech, aby se potlačil efekt různých dnů v týdnu.
 ![Dynamika šíření](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/spread_factor.png)
 
 
+## Efekt dnů v týdnu
+
+Distribuce nových případů v rámci týdne není rovnoměrná, zejména kvůli provozní
+době a kapacitě odběrových míst. Graf ukazuje, jaký podíl nových případů typicky
+připadá na daný den v týdnu.
+
+![Efekt dnů v týdnu](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/weekday_effect.png)
+
+
 ## Zdroje dat
 
 * Komenda M., Karolyi M., Bulhart V., Žofka J., Brauner T., Hak J., Jarkovský J.,
