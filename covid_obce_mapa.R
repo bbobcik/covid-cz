@@ -120,7 +120,7 @@ place_top_sf <- SpatialPointsDataFrame(
 png(paste0('outputs/', file_date,  '/covid-hotspots-', file_date, '.png'), width=3000L, height=2000L, type='cairo', res=120)
 g31
 dev.off()
-png(paste0('outputs/covid-hotspots-latest.png'), width=2000L, height=1300L, type='cairo', res=120)
+png(paste0('outputs/covid_hotspots_latest.png'), width=2000L, height=1300L, type='cairo', res=120)
 g31
 dev.off()
 
