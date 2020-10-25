@@ -262,6 +262,21 @@ master_pou <- master_ruian %>%
     ) %>% 
     arrange(region_nuts, orp_id, pou_id)
 
+place_population <- read_delim(
+    file='data/place_population.csv',
+    delim=';',
+    col_names=c('place_id', 'pop_total', 'pop_m', 'pop_f', 'avg_age_total', 'avg_age_m', 'avg_age_f'),
+    col_types=cols(
+        col_integer(),
+        col_integer(),
+        col_integer(),
+        col_integer(),
+        col_double(),
+        col_double(),
+        col_double()
+    ),
+    skip=1L,
+)
 
 master_place <- master_ruian %>% 
     inner_join(obec_status_enum, by='status_id') %>%
@@ -269,6 +284,7 @@ master_place <- master_ruian %>%
     inner_join(master_pou, by=c(pou='pou_id'), suffix=c('', '_pou')) %>% 
     inner_join(master_district, by=c(district='district_id'), suffix=c('', '_district')) %>% 
     inner_join(master_region, by='region_nuts', suffix=c('', '_region')) %>% 
+    inner_join(place_population, by=c('id'='place_id'), suffix=c('', '_popul')) %>% 
     transmute(
         place_id = id,
         place_name = name,
@@ -290,6 +306,17 @@ master_place <- master_ruian %>%
         pou_dist = round(sqrt((x-pou_x)^2 + (y-pou_y)^2) / 1000, 1),
         district_dist = round(sqrt((x-district_x)^2 + (y-district_y)^2) / 1000, 1),
         region_dist = round(sqrt((x-region_x)^2 + (y-region_y)^2) / 1000, 1),
+        pop_total,
+        pop_m,
+        pop_f,
+        avg_age_total,
+        avg_age_m,
+        avg_age_f,
     ) %>%
     arrange(region_nuts, district_nuts, desc(weight), place_id)
     
+
+
+master_place %>% 
+    filter(place_name %in% c('Nová Bystřice')) %>% 
+    view()

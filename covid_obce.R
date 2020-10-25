@@ -2,7 +2,7 @@ library(slider)
 
 
 place_cases <- read_delim(
-    file='obec_20201024.csv',
+    file='obec_20201025.csv',
     delim=';',
     col_types=cols_only(
         date = col_date('%Y-%m-%d'),
@@ -546,3 +546,56 @@ spread_by_region %>%
     custom_theme
     
         
+place_cases %>% 
+    filter(
+        date >= ymd('2020-08-03'),
+        date < today(),
+    )
+
+
+place_rel_cases <- place_cases %>% 
+    filter(
+        date >= today() - weeks(1L),
+        date < today(),
+    ) %>% 
+    group_by(place_code) %>% 
+    arrange(.by_group=T, date) %>% 
+    summarise(
+        new_cases = sum(new_cases),
+        init_act_cases = first(act_cases),
+        act_cases = last(act_cases),
+        .groups = 'drop'
+    ) %>% 
+    filter(
+        new_cases > 0L,
+        act_cases > 0L,
+    ) %>% 
+    inner_join(master_place, by=c('place_code'='place_id')) %>% 
+    filter(pop_total > 0L) %>% 
+    transmute(
+        place_name,
+        q_act_cases = act_cases / pop_total,
+        q_new_cases = new_cases / (pop_total - init_act_cases),
+        init_act_cases,
+        new_cases,
+        act_cases,
+        region_abbr,
+        place_id = place_code,
+        pop_total,
+        avg_age_total,
+        place_x,
+        place_y,
+    )
+
+
+place_top_cases <- place_rel_cases %>% 
+    filter(
+        new_cases >= 2L,
+        q_new_cases >= 0.005,
+    ) %>% 
+    group_by(region_abbr) %>% 
+    arrange(.by_group=T, desc(q_new_cases), desc(q_act_cases), desc(pop_total)) %>% 
+    slice_head(n=100L) %>% 
+    ungroup() %>% 
+    arrange(desc(q_new_cases), desc(q_act_cases), desc(pop_total))
+

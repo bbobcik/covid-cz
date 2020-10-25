@@ -80,3 +80,42 @@ dev.off()
 png(paste0('covid_dynamic_place-', file_date, '.png'), width=2000L, height=1200L, type='cairo', res=120)
 g2x_aligned[[2]]
 dev.off()
+
+
+
+place_top_sf <- SpatialPointsDataFrame(
+    place_top_cases %>% select(place_x, place_y),
+    data=place_top_cases,
+    proj4string=krovak_projection
+    ) %>% 
+    sf::st_as_sf() %>% 
+    mutate(
+        name_short = str_trunc(place_name, 17L, ellipsis=''),
+    )
+
+(g31 <- ggplot() +
+    geom_sf(data=region_boundaries, colour='black', fill='#4B4B4B', alpha=0.3) +
+    geom_sf(data=place_top_sf, aes(size=q_act_cases, colour=q_new_cases), alpha=0.3) +
+    geom_sf_text(data=place_top_sf, aes(label=name_short), size=3, na.rm=T) +
+    scale_size_continuous(name='Zasažení populace', range=c(0.1, 8), labels=percent_format(accuracy=1), guide=guide_legend(order=1L)) +
+    scale_colour_gradient(name='Relativní přírůstek', low='blue', high='red', label=percent_format(accuracy=1), guide=guide_legend(order=2L)) +
+    standard_label('Významný výskyt nákaz za posledních 7 dnů') +
+    #labs(title='Dynamika nákazy podle obcí', caption='Zdroj dat: https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19') +
+    theme_minimal() +
+    theme(
+        panel.border=element_blank(),
+        panel.grid=element_blank(),
+        axis.line.x = NULL,
+        axis.line.y = NULL,
+        axis.text = element_blank(), 
+        axis.title = element_blank(), 
+        legend.position=c(1,1),
+        legend.justification=c(1,1),
+        legend.direction='horizontal',
+        legend.box.just='right',
+        legend.box.margin=margin(0,0,0,0),
+        legend.background=element_rect(fill='white')
+    ) +
+    NULL)
+
+ggplotly(g31)
