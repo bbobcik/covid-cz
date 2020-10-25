@@ -27,6 +27,8 @@ custom_theme <- theme_bw() +
         plot.caption=element_text(size=8, colour='darkgray')
     )
 
+file_date <- place_cases %>% pull(date) %>% max() %>% strftime('%Y-%m-%d')
+
 
 
 ################################################################################
@@ -309,7 +311,7 @@ gov_interventions_timeline <- tibble(
     )
 
 
-covid_week %>% 
+(g05 <- covid_week %>% 
     filter(week >= ymd('2020-09-14')) %>% 
     mutate(
         rel_prev = prevalence / pop,
@@ -330,7 +332,19 @@ covid_week %>%
         axis.title.x.bottom=element_text(hjust=0.97, margin=margin(-30,0,20,0, unit='pt')),
         axis.title.y.left=element_text(hjust=0.95, margin=margin(0,-50,0,40, unit='pt')),
     ) +
-    NULL
+    NULL)
+
+
+png(paste0('outputs/', file_date,  '/covid_dyn_', file_date, '.png'), width=3000L, height=2000L, type='cairo', res=120)
+g05
+dev.off()
+png(paste0('outputs/covid_dyn_latest.png'), width=2000L, height=1300L, type='cairo', res=120)
+g05
+dev.off()
+
+
+
+
 
 
 covid_week %>% 

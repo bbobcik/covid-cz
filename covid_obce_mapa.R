@@ -72,7 +72,6 @@ place_latest_sf <- sf::st_as_sf(SpatialPointsDataFrame(covid_growth_by_place %>%
     NULL)
 
 
-file_date <- place_cases %>% pull(date) %>% max() %>% strftime('%Y-%m-%d')
 g2x_aligned <- align_patches(g21, g22)
 png(paste0('covid_dynamic_orp-', file_date, '.png'), width=2000L, height=1200L, type='cairo', res=120)
 g2x_aligned[[1]]

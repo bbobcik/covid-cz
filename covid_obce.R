@@ -690,5 +690,5 @@ place_top_cases <- place_rel_cases %>%
     filter(
         (q_new_cases >= q_new_cases_threshold) | (q_act_cases >= q_act_cases_threshold)
     ) %>% 
-    arrange(desc(q_new_cases), desc(q_act_cases), desc(pop_total))
+    arrange(q_new_cases, q_act_cases, pop_total)
 

@@ -35,6 +35,16 @@ dnech, aby se potlačil efekt různých dnů v týdnu.
 
 ![Dynamika šíření](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/spread_factor.png)
 
+Následující graf ukazuje vztah mezi relativním počtem aktivních případů
+(vztaženo k počtu obyvatel spadajících pod danou obec s rozšířenou působností)
+a relativním počtem nových případů za uplynulý týden (vztaženo k počtu doposud
+zdravých obyvatel).
+
+Z dosavadního vývoje lze odhadovat existenci pozitivní zpětné vazby, která má
+za následek exponenciální průběh epidemie.
+
+![Dynamika šíření](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/covid_dyn_latest.png)
+
 
 ## Efekt dnů v týdnu
 
