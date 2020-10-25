@@ -3,10 +3,14 @@
 
 ## Vyhodnocení předpovědi
 
-![Poslední předpověď](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/covid_forecast_eval_latest.png)
-
-Vysvětlivka: Tečky reprezentují datové údaje, ze kterých vychází předpověď. Křížky
+Tečky reprezentují datové údaje, ze kterých vychází předpověď. Křížky
 jsou pak údaje z následujících dnů, aby bylo možné sledovat kvalitu předpovědi.
+
+Upozornění: Předpověď exponenciálních trendů je mimořádně obtížná, zejména
+při nedostatku kvalitních vstupních dat. Nedoporučuji dělat z následujících
+předpovědí žádné významné závěry.
+
+![Poslední předpověď](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/covid_forecast_eval_latest.png)
 
 
 ## Regionální přehledy aktuální situace
@@ -15,6 +19,10 @@ jsou pak údaje z následujících dnů, aby bylo možné sledovat kvalitu před
 
 
 ## Lokální hotspoty
+
+Velikost bodu reprezentuje podíl infikovaných obyvatel v dané obci. Barva bodu
+odpovídá velikosti přírůstku případů za posledních 7 dnů (v poměru k počtu
+zdravých obyvatel).
 
 ![Lokální hotspoty](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/covid_hotspots_latest.png)
 

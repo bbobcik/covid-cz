@@ -676,16 +676,19 @@ place_rel_cases <- place_cases %>%
 
 place_top_cases <- place_rel_cases %>% 
     mutate(
-        q_new_cases_threshold = quantile(q_new_cases, 0.667),
+        q_act_cases_threshold = quantile(q_act_cases, 0.9),
+        q_new_cases_threshold = quantile(q_new_cases, 0.9),
     ) %>% 
     filter(
         pop_total >= 500L,
         new_cases >= 5L,
-        q_new_cases >= q_new_cases_threshold,
     ) %>% 
     group_by(region_abbr) %>% 
     arrange(.by_group=T, desc(q_act_cases), desc(q_new_cases), desc(pop_total)) %>% 
-    slice_head(n=15L) %>% 
+    slice_head(n=20L) %>% 
     ungroup() %>% 
+    filter(
+        (q_new_cases >= q_new_cases_threshold) | (q_act_cases >= q_act_cases_threshold)
+    ) %>% 
     arrange(desc(q_new_cases), desc(q_act_cases), desc(pop_total))
 

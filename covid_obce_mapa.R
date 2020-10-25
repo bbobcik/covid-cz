@@ -98,23 +98,21 @@ place_top_sf <- SpatialPointsDataFrame(
     geom_sf(data=place_top_sf, aes(size=q_act_cases, colour=q_new_cases), alpha=0.3) +
     geom_text_repel(
         data = place_top_sf,
-        mapping = aes(geometry=geometry, x=after_stat(x), y=after_stat(y), label=name_short),
+        mapping = aes(geometry=geometry, x=after_stat(x), y=after_stat(y), label=place_name),
         colour='black',
         stat = 'sf_coordinates',
         size = 3,
         na.rm = T,
-        box.padding=unit(2, 'mm'),
-        force = 1.5,
-        max.iter = 3000,
+        box.padding=unit(2, 'pt'),
+        max.iter = 500,
+        seed = 199137317L,
     ) +
     scale_size_continuous(name='Zasažení populace', range=c(0.1, 8), labels=percent_format(accuracy=1), guide=guide_legend(order=1L)) +
     scale_colour_gradient(name='Relativní přírůstek', low='blue', high='red', label=percent_format(accuracy=1), guide=guide_legend(order=2L)) +
     standard_label('Významný výskyt nákaz za posledních 7 dnů') +
-    #theme_minimal() +
-    #theme_bw() +
-    theme_gray() +
+    theme_minimal() +
     theme(
-        text=element_text(debug=T),
+        #text=element_text(debug=T),
         panel.border=element_blank(),
         panel.grid=element_blank(),
         axis.line.x = NULL,
@@ -127,10 +125,6 @@ place_top_sf <- SpatialPointsDataFrame(
         legend.box.just='right',
         legend.box.margin=margin(0,0,0,0),
         legend.background=element_rect(fill='white'),
-#        axis.text.x=element_text(),
-#        axis.text.y=element_text(),
-#        text=element_text(),
-#        legend.text=element_text(),
     ) +
     NULL)
 
