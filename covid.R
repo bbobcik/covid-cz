@@ -14,6 +14,7 @@ library(mgcv)
 library(cowplot)
 library(patchwork)
 library(slider)
+library(ggrepel)
 
 
 standard_label <- function(title) {

@@ -96,12 +96,25 @@ place_top_sf <- SpatialPointsDataFrame(
 (g31 <- ggplot() +
     geom_sf(data=region_boundaries, colour='darkgray', fill='#4B4B4B', alpha=0.3, size=0.3) +
     geom_sf(data=place_top_sf, aes(size=q_act_cases, colour=q_new_cases), alpha=0.3) +
-    geom_sf_text(data=place_top_sf, aes(label=name_short), size=3, na.rm=T) +
+    geom_text_repel(
+        data = place_top_sf,
+        mapping = aes(geometry=geometry, x=after_stat(x), y=after_stat(y), label=name_short),
+        colour='black',
+        stat = 'sf_coordinates',
+        size = 3,
+        na.rm = T,
+        box.padding=unit(2, 'mm'),
+        force = 1.5,
+        max.iter = 3000,
+    ) +
     scale_size_continuous(name='Zasažení populace', range=c(0.1, 8), labels=percent_format(accuracy=1), guide=guide_legend(order=1L)) +
     scale_colour_gradient(name='Relativní přírůstek', low='blue', high='red', label=percent_format(accuracy=1), guide=guide_legend(order=2L)) +
     standard_label('Významný výskyt nákaz za posledních 7 dnů') +
-    theme_minimal() +
+    #theme_minimal() +
+    #theme_bw() +
+    theme_gray() +
     theme(
+        text=element_text(debug=T),
         panel.border=element_blank(),
         panel.grid=element_blank(),
         axis.line.x = NULL,
@@ -113,7 +126,11 @@ place_top_sf <- SpatialPointsDataFrame(
         legend.direction='horizontal',
         legend.box.just='right',
         legend.box.margin=margin(0,0,0,0),
-        legend.background=element_rect(fill='white')
+        legend.background=element_rect(fill='white'),
+#        axis.text.x=element_text(),
+#        axis.text.y=element_text(),
+#        text=element_text(),
+#        legend.text=element_text(),
     ) +
     NULL)
 
@@ -126,3 +143,39 @@ dev.off()
 
 
 ggplotly(g31)
+
+
+
+
+ggplot() +
+    geom_sf(data=region_boundaries, colour='darkgray', fill='#4B4B4B', alpha=0.3, size=0.3) +
+    geom_sf(data=place_top_sf, aes(size=q_act_cases, colour=q_new_cases), alpha=0.3) +
+    #geom_sf_text(data=place_top_sf, aes(label=name_short), size=2.5, na.rm=T, check_overlap=F) +
+    NULL
+
+if (requireNamespace("sf", quietly = TRUE)) {
+
+    nc <- sf::st_read(system.file("shape/nc.shp", package="sf"))
+    
+    ggplot(nc) +
+        stat_sf_coordinates()
+    
+    ggplot(nc) +
+        geom_errorbarh(
+            aes(geometry = geometry,
+                xmin = after_stat(x) - 0.1,
+                xmax = after_stat(x) + 0.1,
+                y = after_stat(y),
+                height = 0.04),
+            stat = "sf_coordinates"
+        )
+    
+    ggplot(nc) +
+        geom_text(
+            mapping = aes(geometry=geometry, x=after_stat(x), y=after_stat(y), label=NAME),
+            stat = 'sf_coordinates',
+        )
+
+    ggplot2::stat_sf_coordinates(data=nc, mapping=aes(geometry=geometry)) %>% str()
+    
+}

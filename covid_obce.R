@@ -35,9 +35,18 @@ interesting_places <- place_cases %>%
         546798L, # NB
         546101L, # Cimer
         547212L, # Stare M.p.L
-#        541150L, # Kammeny Ujezd
-#        592579L, # Slavkov
-#        554804L, # UnL
+#        546542L, # Kardašova Řečice
+        -1L
+    ))
+
+interesting_places2 <- place_cases %>% 
+    filter(place_code %in% c(
+        592579L, # Slavkov
+        592188L, # HorNěmčí
+        592145L, # DolNěmčí
+        592439L, # Nivnice
+        592056L, # Boršice
+        #        554804L, # UnL
         -1L
     ))
 
@@ -64,7 +73,7 @@ interesting_places <- place_cases %>%
     geom_dl(aes(label=place_name), method=list(cex=0.8, dl.trans(x=x+0.25), 'maxvar.qp')) +
     scale_x_date(name=NULL, date_breaks='1 week', date_minor_breaks='1 day', date_labels='%e.%b.', expand=expansion(0, c(2,10))) +
     scale_y_continuous(name=NULL, breaks=extended_breaks(Q=c(2,5,1,3,4), w=c(0.2, 0.4, 0.15, 0.25)), minor_breaks=NULL, labels=number_format(accuracy=1)) +
-    standard_label('Počet aktivních případů Covid-19 ve vybraných obcích') +
+    standard_label('Počet aktivních případů Covid-19 ve vybraných obcích - Novobystřicko') +
     custom_theme +        
     theme(
         panel.grid.major.x=element_line(color='#B0B0B0'),
@@ -72,12 +81,49 @@ interesting_places <- place_cases %>%
     ) +
     NULL)
 
+(g19b <- interesting_places2 %>%
+        filter(
+            date >= ymd('2020-09-14'),
+            date < today(),
+        ) %>% 
+        group_by(place_name) %>% 
+        arrange(.by_group=T, date) %>% 
+        mutate(
+            act_cases = case_when(
+                date == max(date)                        ~ act_cases,
+                act_cases == lag(act_cases, default=-1L) ~ NA_integer_,
+                TRUE                                     ~ act_cases,
+            )
+        ) %>% 
+        filter(!is.na(act_cases)) %>% 
+        ggplot(aes(x=date, y=act_cases, group=place_name, colour=place_name)) +
+        geom_step(size=2, alpha=0.5, show.legend=F) +
+        geom_point(size=4, alpha=0.75, show.legend=F) +
+        geom_dl(aes(label=place_name), method=list(cex=0.8, dl.trans(x=x+0.25), 'maxvar.qp')) +
+        scale_x_date(name=NULL, date_breaks='1 week', date_minor_breaks='1 day', date_labels='%e.%b.', expand=expansion(0, c(2,10))) +
+        scale_y_continuous(name=NULL, breaks=extended_breaks(Q=c(2,5,1,3,4), w=c(0.2, 0.4, 0.15, 0.25)), minor_breaks=NULL, labels=number_format(accuracy=1)) +
+        standard_label('Počet aktivních případů Covid-19 ve vybraných obcích - Slovácko') +
+        custom_theme +        
+        theme(
+            panel.grid.major.x=element_line(color='#B0B0B0'),
+            plot.title=element_text(size=12),
+        ) +
+        NULL)
+
+
+
+
+
+
 interest_plot_date = interesting_places %>% pull(date) %>% max() %>% strftime('%Y-%m-%d')
-png(paste0('outputs/', interest_plot_date, '/covid_focus_', interest_plot_date, '.png'), width=2000, height=1200, res=120, type='cairo')
+png(paste0('outputs/', interest_plot_date, '/covid_focus_nb_', interest_plot_date, '.png'), width=2000, height=1200, res=120, type='cairo')
 g19
 dev.off()
-png('outputs/covid_focus_latest.png', width=1500, height=800, res=90, type='cairo')
+png('outputs/covid_focus_nb_latest.png', width=1500, height=800, res=90, type='cairo')
 g19
+dev.off()
+png('outputs/covid_focus_sl_latest.png', width=1500, height=800, res=90, type='cairo')
+g19b
 dev.off()
 
 
