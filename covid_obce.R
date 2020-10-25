@@ -47,6 +47,7 @@ interesting_places2 <- place_cases %>%
         592439L, # Nivnice
         592056L, # Boršice
         592170L, # Hluk
+        592617L, # Strání
         -1L
     ))
 
@@ -109,9 +110,6 @@ interesting_places2 <- place_cases %>%
             plot.title=element_text(size=12),
         ) +
         NULL)
-
-
-
 
 
 
