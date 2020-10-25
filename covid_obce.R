@@ -46,7 +46,7 @@ interesting_places2 <- place_cases %>%
         592145L, # DolNěmčí
         592439L, # Nivnice
         592056L, # Boršice
-        #        554804L, # UnL
+        592170L, # Hluk
         -1L
     ))
 
