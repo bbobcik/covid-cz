@@ -8,3 +8,8 @@
 ### Okolí Slavkova
 
 ![Vývoj v okolí Slavkova](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/covid_focus_sl_latest.png)
+
+
+### Průřez JBr
+
+![Vývoj v okolí JBr](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/covid_focus_jbr_latest.png)
