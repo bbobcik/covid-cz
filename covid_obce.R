@@ -580,6 +580,7 @@ place_rel_cases <- place_cases %>%
         new_cases,
         act_cases,
         region_abbr,
+        district_nuts,
         place_id = place_code,
         pop_total,
         avg_age_total,
@@ -589,13 +590,17 @@ place_rel_cases <- place_cases %>%
 
 
 place_top_cases <- place_rel_cases %>% 
+    mutate(
+        q_new_cases_threshold = quantile(q_new_cases, 0.667),
+    ) %>% 
     filter(
-        new_cases >= 2L,
-        q_new_cases >= 0.005,
+        pop_total >= 500L,
+        new_cases >= 5L,
+        q_new_cases >= q_new_cases_threshold,
     ) %>% 
     group_by(region_abbr) %>% 
-    arrange(.by_group=T, desc(q_new_cases), desc(q_act_cases), desc(pop_total)) %>% 
-    slice_head(n=100L) %>% 
+    arrange(.by_group=T, desc(q_act_cases), desc(q_new_cases), desc(pop_total)) %>% 
+    slice_head(n=15L) %>% 
     ungroup() %>% 
     arrange(desc(q_new_cases), desc(q_act_cases), desc(pop_total))
 

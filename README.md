@@ -14,6 +14,11 @@ jsou pak údaje z následujících dnů, aby bylo možné sledovat kvalitu před
 ![Vývoj v okolí NB](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/covid_focus_latest.png)
 
 
+## Lokální hotspoty
+
+![Lokální hotspoty](https://raw.githubusercontent.com/bbobcik/covid-cz/master/outputs/covid_hotspots_latest.png)
+
+
 ## Dynamika šíření nákazy
 
 Graf ilustruje poměr počtu nových případů mezi dny D+7 a D. Počet nových případů
