@@ -2,7 +2,7 @@ library(slider)
 
 
 place_cases <- read_delim(
-    file='obec_20201025.csv',
+    file='obec_20201026.csv',
     delim=';',
     col_types=cols_only(
         date = col_date('%Y-%m-%d'),
@@ -617,7 +617,7 @@ spread_by_region <- place_cases %>%
     inner_join(region_abbr_enum, by=c('region_id'='nuts'))
 
 
-spread_by_region %>% 
+(g32 <- spread_by_region %>% 
     ggplot(aes(x=date)) +
     geom_ribbon(aes(ymin=spread_25, ymax=spread_75), fill='skyblue', alpha=0.5) +
     geom_line(aes(y=spread_50), colour='darkblue', size=0.25) +
@@ -628,8 +628,13 @@ spread_by_region %>%
     scale_x_date(name=NULL) +
     scale_y_continuous(name=NULL, minor_breaks=NULL, labels=percent_format()) +
     standard_label('Faktor šíření nových případů (N=7 dnů)') +
-    custom_theme
+    custom_theme +
+    NULL)
     
+png('outputs/spread_factor.png', width=2000L, height=1200L, type='cairo', res=120)
+g32
+dev.off()
+
         
 place_cases %>% 
     filter(
@@ -688,7 +693,9 @@ place_top_cases <- place_rel_cases %>%
     slice_head(n=20L) %>% 
     ungroup() %>% 
     filter(
-        (q_new_cases >= q_new_cases_threshold) | (q_act_cases >= q_act_cases_threshold)
+        (q_new_cases >= q_new_cases_threshold) | (q_act_cases >= q_act_cases_threshold),
+        !is.na(place_x),
+        !is.na(place_y),
     ) %>% 
     arrange(q_new_cases, q_act_cases, pop_total)
 

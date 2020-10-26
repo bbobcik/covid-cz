@@ -315,7 +315,8 @@ gov_interventions_timeline <- tibble(
     filter(week >= ymd('2020-09-14')) %>% 
     mutate(
         rel_prev = prevalence / pop,
-        rel_new = new_cases / (pop - prevalence),
+        rel_new = new_cases / prevalence,
+        #rel_new = new_cases / (pop - prevalence),
     ) %>%
     arrange(week, desc(pop), region_abbr, desc(rel_prev), orp_code) %>% 
     ggplot(aes(x=rel_prev, y=rel_new, colour=week_disc)) +
@@ -904,4 +905,28 @@ region_forecast %>%
 
     
 
+xjh <- c(1L, 1L, 0L, 2L, 2L, 2L, 1L, 4L, 9L, 4L, 2L, 18L, 29L, 37L, 99L, 175L, 418L)
 
+xff <- function(x, pop=1, .c=1) {
+    y <- 2^(as.numeric(x)-17) * as.numeric(pop)
+    return (y)
+}
+
+tibble(
+    x = seq_along(xjh),
+    jh = log10(as.numeric(xjh) / 47113),
+    ref = round(xff(0:(length(xjh)-1), pop=1, .c=1))
+) %>% 
+ggplot(aes(x=x)) +
+    geom_line(aes(y=jh, colour='JH')) +
+    geom_line(aes(y=ref, colour='Ref'))
+
+
+
+covid_week %>% 
+    filter(
+        ruian_orp_id == 345L,
+        week >= ymd('2020-06-29')
+    ) %>% view()
+    select(week, new_cases, prevalence, hospitalised)
+    
