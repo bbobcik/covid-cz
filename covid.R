@@ -138,6 +138,31 @@ covid_dow <- covid_full_info %>%
     arrange(.by_group=T, date) %>% 
     mutate(
         week = floor_date(date, unit="week", week_start=1L),
+        dow = factor(wday(date, label=T, abbr=F, locale='Czech'), ordered=T, levels=c('pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota', 'neděle')),
+        new_cases = pmax(prev - lag(prev, default=0L), 0),
+        new_hospit = pmax(hospit - lag(hospit, default=0L), 0),
+    ) %>%
+    group_by(.add=T, dow) %>% 
+    arrange(.by_group=T) %>% 
+    summarise(
+        new_cases = sum(new_cases),
+        new_hospit = sum(new_hospit),
+        prevalence = last(prev),
+        hospitalised = last(hospit),
+        .groups = 'drop_last'
+    ) %>%
+    mutate(
+        q_new = new_cases / pmax(sum(new_cases), 1),
+        c_new = cumsum(q_new),
+    ) %>% 
+    ungroup()
+
+
+covid_dow <- covid_full_info %>% 
+    group_by(region_abbr, name, orp_code, ruian_orp_id, pop) %>% 
+    arrange(.by_group=T, date) %>% 
+    mutate(
+        week = floor_date(date, unit="week", week_start=1L),
         dow = factor(wday(date, label=T, abbr=F, locale='cs_CZ.UTF8'), ordered=T, levels=c('Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle')),
         new_cases = pmax(prev - lag(prev, default=0L), 0),
         new_hospit = pmax(hospit - lag(hospit, default=0L), 0),
@@ -315,8 +340,8 @@ gov_interventions_timeline <- tibble(
     filter(week >= ymd('2020-09-14')) %>% 
     mutate(
         rel_prev = prevalence / pop,
-        rel_new = new_cases / prevalence,
-        #rel_new = new_cases / (pop - prevalence),
+        #rel_new = new_cases / prevalence,
+        rel_new = new_cases / (pop - prevalence),
     ) %>%
     arrange(week, desc(pop), region_abbr, desc(rel_prev), orp_code) %>% 
     ggplot(aes(x=rel_prev, y=rel_new, colour=week_disc)) +

@@ -2,21 +2,22 @@
 
 library(rgdal)
 
-region_abbr_enum <- tribble(~nuts, ~region_abbr, ~region_iso,
-   'CZ010', 'Prg', 'CZ-PR',
-   'CZ020', 'Str', 'CZ-ST',
-   'CZ031', 'JCe', 'CZ-JC',
-   'CZ032', 'Plz', 'CZ-PL',
-   'CZ041', 'KVa', 'CZ-KA',
-   'CZ042', 'Ust', 'CZ-US',
-   'CZ051', 'Lib', 'CZ-LI',
-   'CZ052', 'HKr', 'CZ-KR',
-   'CZ053', 'Par', 'CZ-PA',
-   'CZ063', 'Vys', 'CZ-VY',
-   'CZ064', 'JMo', 'CZ-JM',
-   'CZ071', 'Olo', 'CZ-OL',
-   'CZ072', 'Zli', 'CZ-ZL',
-   'CZ080', 'MSl', 'CZ-MO',
+# region_mzcr se pouziva v prehledech zdravotnickych kapacit
+region_abbr_enum <- tribble(~nuts, ~region_abbr, ~region_iso, ~region_mzcr,
+   'CZ010', 'Prg', 'CZ-PR', 'PHA',
+   'CZ020', 'Str', 'CZ-ST', 'STC',
+   'CZ031', 'JCe', 'CZ-JC', 'JHC',
+   'CZ032', 'Plz', 'CZ-PL', 'PLK',
+   'CZ041', 'KVa', 'CZ-KA', 'KVK',
+   'CZ042', 'Ust', 'CZ-US', 'ULK',
+   'CZ051', 'Lib', 'CZ-LI', 'LBK',
+   'CZ052', 'HKr', 'CZ-KR', 'HKK',
+   'CZ053', 'Par', 'CZ-PA', 'PAK',
+   'CZ063', 'Vys', 'CZ-VY', 'VYS',
+   'CZ064', 'JMo', 'CZ-JM', 'JHM',
+   'CZ071', 'Olo', 'CZ-OL', 'OLK',
+   'CZ072', 'Zli', 'CZ-ZL', 'ZLK',
+   'CZ080', 'MSl', 'CZ-MO', 'MSK',
     )
 
 obec_status_enum <- tribble(~status_id, ~status, ~status_text, ~weight,
@@ -315,8 +316,3 @@ master_place <- master_ruian %>%
     ) %>%
     arrange(region_nuts, district_nuts, desc(weight), place_id)
     
-
-
-master_place %>% 
-    filter(place_name %in% c('Nová Bystřice')) %>% 
-    view()

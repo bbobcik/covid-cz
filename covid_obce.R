@@ -2,7 +2,7 @@ library(slider)
 
 
 place_cases <- read_delim(
-    file='obec_20201026.csv',
+    file='obec_20201027.csv',
     delim=';',
     col_types=cols_only(
         date = col_date('%Y-%m-%d'),
