@@ -5,6 +5,8 @@
 *.pdf
 *.png
 *.csv
-!outputs/**/*.png
+*.xml
+*.rds
+!outputs/**/*
 !data/**/*.csv
 20200930_ST_UZSZ.xml

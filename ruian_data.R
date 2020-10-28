@@ -1,7 +1,5 @@
 # Obce detailne
 
-library(rgdal)
-
 # region_mzcr se pouziva v prehledech zdravotnickych kapacit
 region_abbr_enum <- tribble(~nuts, ~region_abbr, ~region_iso, ~region_mzcr,
    'CZ010', 'Prg', 'CZ-PR', 'PHA',

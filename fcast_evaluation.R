@@ -1,6 +1,3 @@
-library(plotly)
-
-
 covid_orp_2 <- read_delim(
     file='https://onemocneni-aktualne.mzcr.cz/api/account/verejne-distribuovana-data/file/dip%252Fweb_orp.csv',
     delim=";",
@@ -127,20 +124,16 @@ region_forecast_2 <- readRDS('models/region_forecast_20201021.rds')
         NULL)
 
 
-fcast_eval_date <- strftime(today(), '%Y-%m-%d')
-png(paste0('outputs/', fcast_eval_date, '/covid_forecast_eval_', fcast_eval_date, '.png'), width=2400L, height=1200L, type='cairo', res=120)
-(g13/g11) | (g14/g12)
+png(paste0('outputs/', file_date, '/covid_forecast_eval_', file_date, '.png'), width=2400L, height=1200L, type='cairo', res=120)
+print((g13/g11) | (g14/g12))
 dev.off()
 png('outputs/covid_forecast_eval_latest.png', width=1500L, height=800L, type='cairo', res=90)
-((g13/g11) | (g14/g12)) +
+print(((g13/g11) | (g14/g12)) +
     plot_annotation(
         caption='Autor: Boleslav Bobčík, https://github.com/bbobcik/covid-cz\nZdroj dat: MZČR, https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19',
         theme = theme(plot.caption=element_text(size=8, colour='darkgray')))
+)
 dev.off()
 
 
-
-htmlwidgets::saveWidget(as_widget(ggplotly(g11)), 'region_diag.html')
-htmlwidgets::saveWidget(as_widget(ggplotly(g12)), 'region_hosp.html')
-htmlwidgets::saveWidget(as_widget(ggplotly(g13)), 'total_diag.html')
-htmlwidgets::saveWidget(as_widget(ggplotly(g14)), 'total_hosp.html')
+rm(g11, g12, g13, g14)
